@@ -1,0 +1,6 @@
+/*
+  X-Frame-Options: ALLOWALL
+  Access-Control-Allow-Origin: *
+  
+/video-player.html
+  Content-Type: text/html; charset=utf-8

